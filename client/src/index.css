@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F8F9FB] text-gray-900 antialiased font-['Inter',_sans-serif];
+  }
+}
+
+@layer components {
+  .glass-chat {
+    @apply bg-black/5 backdrop-blur-md border-l border-white/10;
+  }
+  
+  .sidebar-item {
+    @apply flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5 cursor-pointer;
+  }
+  
+  .sidebar-item.active {
+    @apply text-white bg-white/10;
+  }
+
+  .kanban-column {
+    @apply flex flex-col w-[320px] min-w-[320px] h-full;
+  }
+
+  .task-card {
+    @apply bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer;
+  }
+}
