@@ -1,6 +1,7 @@
 const File = require('../models/File');
 const Workspace = require('../models/Workspace');
 const Notification = require('../models/Notification');
+const Activity = require('../models/Activity');
 
 // @desc    Upload a file
 // @route   POST /api/files
@@ -45,6 +46,16 @@ const uploadFile = async (req, res) => {
         io.to(`user_${memberId}`).emit('newNotification');
       }
     });
+
+    // Log activity
+    await Activity.create({
+      workspaceId,
+      userId: req.user._id,
+      type: 'file_uploaded',
+      message: `${req.user.name} uploaded "${newFile.fileName}"`,
+      meta: { fileId: newFile._id, fileUrl: newFile.fileUrl },
+    });
+    io.to(`workspace_${workspaceId}`).emit('activityCreated');
 
     res.status(201).json(newFile);
   } catch (error) {

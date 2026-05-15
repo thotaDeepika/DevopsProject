@@ -1,0 +1,13 @@
+# Root gitignore
+node_modules/
+dist/
+.env
+*.log
+
+# Client specific
+client/node_modules/
+client/dist/
+
+# Server specific
+server/node_modules/
+server/.env

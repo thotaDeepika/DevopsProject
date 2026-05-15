@@ -22,8 +22,9 @@ const server = http.createServer(app);
 // Socket.IO Setup
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || '*',
+    origin: [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://127.0.0.1:5173'],
     methods: ['GET', 'POST'],
+    credentials: true
   },
 });
 
@@ -39,7 +40,26 @@ io.on('connection', (socket) => {
 app.use(express.json());
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
+
+// Allow multiple common local ports for development
+const allowedOrigins = [
+  process.env.FRONTEND_URL, 
+  'http://localhost:5173', 
+  'http://localhost:5174', 
+  'http://localhost:5175',
+  'http://127.0.0.1:5173'
+];
+
+app.use(cors({ 
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -49,6 +69,8 @@ app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/files', require('./routes/fileRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/activity', require('./routes/activityRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -63,7 +85,7 @@ app.get('/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 
 server.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);

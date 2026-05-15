@@ -100,9 +100,44 @@ const getWorkspaceMembers = async (req, res) => {
   }
 };
 
+// @desc    Remove a member from workspace
+// @route   DELETE /api/workspaces/:id/members/:memberId
+// @access  Private (Owner only)
+const removeMember = async (req, res) => {
+  try {
+    const workspace = await Workspace.findById(req.params.id);
+    
+    if (!workspace) {
+      res.status(404);
+      throw new Error('Workspace not found');
+    }
+
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Only the workspace owner can remove members');
+    }
+
+    if (workspace.owner.toString() === req.params.memberId) {
+      res.status(400);
+      throw new Error('Owner cannot be removed from workspace');
+    }
+
+    workspace.members = workspace.members.filter(
+      (m) => m.toString() !== req.params.memberId
+    );
+    
+    await workspace.save();
+    res.json({ message: 'Member removed successfully' });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   createWorkspace,
   joinWorkspace,
   getUserWorkspaces,
   getWorkspaceMembers,
+  removeMember,
 };

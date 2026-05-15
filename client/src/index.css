@@ -4,28 +4,46 @@
 
 @layer base {
   body {
-    @apply bg-[#F8F9FB] text-gray-900 antialiased font-['Inter',_sans-serif];
+    @apply antialiased text-gray-900 bg-[#F8F9FB];
+    font-family: 'Inter', sans-serif;
   }
 }
 
 @layer components {
-  .glass-chat {
-    @apply bg-black/5 backdrop-blur-md border-l border-white/10;
-  }
-  
   .sidebar-item {
-    @apply flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5 cursor-pointer;
+    @apply flex items-center space-x-4 px-6 py-4 rounded-2xl cursor-pointer transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5 font-semibold text-sm;
   }
   
   .sidebar-item.active {
-    @apply text-white bg-white/10;
+    @apply bg-white/10 text-white shadow-lg shadow-black/20;
   }
 
   .kanban-column {
-    @apply flex flex-col w-[320px] min-w-[320px] h-full;
+    @apply flex flex-col w-[380px] bg-white/50 backdrop-blur-sm rounded-[48px] p-8 border border-gray-100 shadow-sm;
   }
 
   .task-card {
-    @apply bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer;
+    @apply bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300;
   }
+
+  .form-input {
+    @apply w-full bg-gray-50 border-none rounded-3xl py-5 px-8 text-sm font-medium focus:ring-2 focus:ring-blue-500/10 transition-all placeholder:text-gray-300;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white rounded-3xl font-extrabold text-sm hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 rounded-full hover:bg-gray-300 transition-colors;
 }

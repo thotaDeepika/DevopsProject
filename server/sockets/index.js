@@ -1,14 +1,19 @@
+const onlineUsers = new Map(); // socket.id -> { userId, workspaceId }
+
 module.exports = (io, socket) => {
   // Join a workspace room
-  socket.on('joinWorkspace', (workspaceId) => {
+  socket.on('joinWorkspace', ({ workspaceId, userId }) => {
     socket.join(`workspace_${workspaceId}`);
-    console.log(`Socket ${socket.id} joined workspace_${workspaceId}`);
-  });
-
-  // Leave a workspace room
-  socket.on('leaveWorkspace', (workspaceId) => {
-    socket.leave(`workspace_${workspaceId}`);
-    console.log(`Socket ${socket.id} left workspace_${workspaceId}`);
+    onlineUsers.set(socket.id, { userId, workspaceId });
+    
+    // Broadcast to others in workspace that user is online
+    socket.to(`workspace_${workspaceId}`).emit('userOnline', { userId });
+    
+    // Send list of currently online users to the joining user
+    const usersInWorkspace = Array.from(onlineUsers.values())
+      .filter(u => u.workspaceId === workspaceId)
+      .map(u => u.userId);
+    socket.emit('onlineUsersList', usersInWorkspace);
   });
 
   // Handle typing indicator
@@ -22,6 +27,10 @@ module.exports = (io, socket) => {
 
   // Disconnect
   socket.on('disconnect', () => {
-    console.log(`Socket disconnected: ${socket.id}`);
+    const user = onlineUsers.get(socket.id);
+    if (user) {
+      socket.to(`workspace_${user.workspaceId}`).emit('userOffline', { userId: user.userId });
+      onlineUsers.delete(socket.id);
+    }
   });
 };

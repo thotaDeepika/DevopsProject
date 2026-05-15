@@ -2,6 +2,7 @@ const Task = require('../models/Task');
 const Board = require('../models/Board');
 const Workspace = require('../models/Workspace');
 const Notification = require('../models/Notification');
+const Activity = require('../models/Activity');
 
 // @desc    Create a task
 // @route   POST /api/tasks
@@ -42,6 +43,16 @@ const createTask = async (req, res) => {
       });
       io.to(`user_${assignedTo}`).emit('newNotification');
     }
+
+    // Log activity
+    await Activity.create({
+      workspaceId,
+      userId: req.user._id,
+      type: 'task_created',
+      message: `${req.user.name} created task "${title}"`,
+      meta: { taskId: task._id, columnId },
+    });
+    io.to(`workspace_${workspaceId}`).emit('activityCreated');
 
     res.status(201).json(task);
   } catch (error) {
@@ -97,6 +108,19 @@ const updateTask = async (req, res) => {
     // Send real-time event
     const io = req.app.get('io');
     io.to(`workspace_${task.workspaceId}`).emit('taskUpdated', updatedTask);
+
+    // Log activity
+    if (req.body.columnId && req.body.columnId !== task.columnId) {
+      const colLabels = { 'todo': 'To Do', 'in-progress': 'In Progress', 'done': 'Done' };
+      await Activity.create({
+        workspaceId: task.workspaceId,
+        userId: req.user._id,
+        type: 'task_moved',
+        message: `${req.user.name} moved "${task.title}" to ${colLabels[req.body.columnId] || req.body.columnId}`,
+        meta: { taskId: task._id, from: task.columnId, to: req.body.columnId },
+      });
+      io.to(`workspace_${task.workspaceId}`).emit('activityCreated');
+    }
 
     res.json(updatedTask);
   } catch (error) {
