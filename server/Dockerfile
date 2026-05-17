@@ -1,22 +1,13 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+# Install only production dependencies to keep image small
+RUN npm ci --omit=dev
 
-# Install dependencies
-RUN npm install --production
-
-# Copy source code
 COPY . .
 
-# Set non-root user for security
-RUN chown -R node:node /app
-USER node
-
-# Expose port
 EXPOSE 5000
 
-# Start server
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

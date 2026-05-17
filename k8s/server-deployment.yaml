@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: collabspace
+  labels:
+    app: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: collabspace-server:latest
+          imagePullPolicy: IfNotPresent  # Crucial for local minikube development to use local images
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: collabspace-config
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: collabspace-secrets
+                  key: jwt-secret
+            - name: JWT_REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: collabspace-secrets
+                  key: jwt-refresh-secret
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: collabspace-secrets
+                  key: cloudinary-cloud-name
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: collabspace-secrets
+                  key: cloudinary-api-key
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: collabspace-secrets
+                  key: cloudinary-api-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  namespace: collabspace
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: server
+  type: ClusterIP
