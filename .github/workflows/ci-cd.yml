@@ -56,7 +56,7 @@ jobs:
     name: Docker Build, Tag & Push
     needs: ci
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: false
 
     steps:
       - name: Checkout Code
@@ -107,7 +107,7 @@ jobs:
     name: Continuous Deployment
     needs: docker
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: false
 
     steps:
       - name: Checkout Code
