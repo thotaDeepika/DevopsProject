@@ -28,31 +28,25 @@ const WhiteboardView = () => {
   const [excalidrawAPI, setExcalidrawAPI] = useState(null);
 
   return (
-    <div className="flex-1 min-w-0 bg-white rounded-[40px] shadow-sm border border-gray-100 flex flex-col">
-      <div className="p-8 border-b border-gray-50 shrink-0">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Team Whiteboard</h2>
-        <p className="text-gray-500 font-medium">Collaborative brainstorming canvas</p>
-      </div>
-      
-      <div className="flex-1 w-full relative">
-        <ErrorBoundary>
-          <Excalidraw
-            excalidrawAPI={(api) => setExcalidrawAPI(api)}
-          >
-            <MainMenu>
-              <MainMenu.DefaultItems.SaveAsImage />
-              <MainMenu.DefaultItems.Export />
-              <MainMenu.DefaultItems.ClearCanvas />
-              <MainMenu.DefaultItems.ChangeCanvasBackground />
-            </MainMenu>
-            <WelcomeScreen>
-              <WelcomeScreen.Hints.MenuHint />
-              <WelcomeScreen.Hints.ToolbarHint />
-              <WelcomeScreen.Hints.HelpHint />
-            </WelcomeScreen>
-          </Excalidraw>
-        </ErrorBoundary>
-      </div>
+    <div className="flex-1 w-full h-full flex flex-col overflow-hidden">
+      <ErrorBoundary>
+        <Excalidraw
+          theme="dark"
+          excalidrawAPI={(api) => setExcalidrawAPI(api)}
+        >
+          <MainMenu>
+            <MainMenu.DefaultItems.SaveAsImage />
+            <MainMenu.DefaultItems.Export />
+            <MainMenu.DefaultItems.ClearCanvas />
+            <MainMenu.DefaultItems.ChangeCanvasBackground />
+          </MainMenu>
+          <WelcomeScreen>
+            <WelcomeScreen.Hints.MenuHint />
+            <WelcomeScreen.Hints.ToolbarHint />
+            <WelcomeScreen.Hints.HelpHint />
+          </WelcomeScreen>
+        </Excalidraw>
+      </ErrorBoundary>
     </div>
   );
 };
