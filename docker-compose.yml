@@ -9,7 +9,7 @@ services:
         VITE_API_URL: http://localhost:5000/api
         VITE_SOCKET_URL: http://localhost:5000
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
       - server
     networks:
@@ -29,7 +29,7 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-      - FRONTEND_URL=http://localhost
+      - FRONTEND_URL=http://localhost:8080
     depends_on:
       - mongo
     networks:
@@ -44,8 +44,32 @@ services:
     networks:
       - collab-network
 
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - collab-network
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - collab-network
+
 networks:
-  collab-network:
+  collab-network: 
     driver: bridge
 
 volumes:

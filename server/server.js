@@ -5,6 +5,16 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const http = require('http');
 const { Server } = require('socket.io');
+const promClient = require('prom-client');
+
+// Initialize Prometheus metrics collection
+promClient.collectDefaultMetrics();
+const httpRequestDurationSeconds = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'code'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
+});
 
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
@@ -41,6 +51,20 @@ app.use(express.json());
 app.use(helmet());
 app.use(morgan('dev'));
 
+// Track HTTP requests duration
+app.use((req, res, next) => {
+  const start = process.hrtime();
+  res.on('finish', () => {
+    const diff = process.hrtime(start);
+    const durationInSeconds = diff[0] + diff[1] / 1e9;
+    const route = req.route ? (req.baseUrl + req.route.path) : req.path;
+    httpRequestDurationSeconds
+      .labels(req.method, route, res.statusCode)
+      .observe(durationInSeconds);
+  });
+  next();
+});
+
 // Allow multiple common local ports for development
 const allowedOrigins = [
   process.env.FRONTEND_URL, 
@@ -60,6 +84,12 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Prometheus metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', promClient.register.contentType);
+  res.end(await promClient.register.metrics());
+});
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

@@ -75,6 +75,10 @@ kind: Service
 metadata:
   name: server
   namespace: collabspace
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "5000"
 spec:
   ports:
     - port: 5000

@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'collabspace-server'
+    scheme: https
+    static_configs:
+      - targets: ['collabspace-backend-jany.onrender.com']
+  - job_name: 'prometheus-infrastructure'
+    static_configs:
+      - targets: ['localhost:9090']
